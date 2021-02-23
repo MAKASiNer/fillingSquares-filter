@@ -21,7 +21,6 @@
 
 
 import sys
-import numpy
 import datetime
 import threading
 from PIL import Image, ImageDraw
@@ -49,7 +48,7 @@ def render(start: list(), step: int, lim: int):
     clr = 0.0
     for y in range(start[1], min(start[1] + step, img.size[1])):
         for x in range(start[0], min(start[0] + step, img.size[0])):
-            clr += arr[y][x] / step ** 2
+            clr += arr[x, y] / step ** 2
             
     # если перешли лимит, то заполняем
     if clr >= lim:      
@@ -83,7 +82,7 @@ result = Image.new("RGB", img.size)
 canvas = ImageDraw.Draw(result)
 
 # загружаем пиксели в массив
-arr = numpy.array(img, dtype='uint8')
+arr = img.load()
 
 # начальный шаг
 step = SCALE_STEP ** RECURSION_DEPTH       
@@ -104,14 +103,14 @@ for y in range(0, img.size[1], step):
 
 # запускает функцию 
 start = datetime.datetime.now()
-print("0.0%", end='')
+print("0.0% ", end='')
 for i in range(len(_list)):
     # функция
     threading.Thread(target=render, args=(_list[i], step, BRIGHTNESS_LIMIT)).run()
 
     # индикация
-    print("\r" * 4 + str(i * 100 / len(_list))[0:4] + "%", end='')
-print("\r" * 4 +"100.0%")
+    print("\r" * 5 + (str(i * 100 / len(_list))[0:4] + "%").ljust(5), end='')
+print("\r" * 5 +"100.0%")
 finish = datetime.datetime.now()
 
 # вывод времени на обработку
